@@ -1,3 +1,4 @@
+
 import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
@@ -114,3 +115,5 @@ if __name__ == "__main__":
     model = CourseRecommendation()
     model.get_predictions()
     model.save_model()
+
+# the ml code for implementation goes here

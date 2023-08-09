@@ -16,6 +16,7 @@ app.register_blueprint(get_resume_data_bp)
 from routes.recommend_courses import recommend_courses_bp
 app.register_blueprint(recommend_courses_bp)
 
+
 from routes.recommend_skills import recommend_skills_bp
 app.register_blueprint(recommend_skills_bp)
 
@@ -28,6 +29,7 @@ app.register_blueprint(overall_score_bp)
 @app.route("/")
 def index():
     return "hello world!"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
