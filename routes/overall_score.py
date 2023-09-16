@@ -26,7 +26,7 @@ def skill_scorer():
             text = fake_file_handle.getvalue()
         return text
     # pdf_file = request.files['pdf_file']
-    resume_text = pdf_reader('resume-screener/api.resume-screener.com/data/Resume-TCET-FORMAT-PKS.pdf')
+    resume_text = pdf_reader('resume-screener/uploads/Resume-TCET-FORMAT-PKS.pdf')
     print(resume_text)
     resume_score = 0
     if 'Objective' in resume_text or 'Summary' in resume_text:

@@ -1,7 +1,7 @@
 import pandas as pd
 import string
 
-df = pd.read_csv("models/model_data/dataset/course_recommendation/all_courses.csv")
+df = pd.read_csv("data/model_data/dataset/course_recommendation/all_courses.csv")
 df_drop = df.drop(
     [
         "Type",
@@ -27,4 +27,4 @@ def preprocess_data(df, col_list):
 
 df_drop = preprocess_data(df_drop, ["Title", "Description"])
 df_drop.dropna(inplace=True)
-df_drop.to_csv("models/model_data/dataset/course_recommendation/preprocessed_data.csv")
+df_drop.to_csv("data/model_data/dataset/course_recommendation/preprocessed_data.csv")

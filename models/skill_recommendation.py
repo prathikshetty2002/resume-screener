@@ -2,8 +2,8 @@ import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
-from model_data.dataset.skill_recommendation.skills import skills_list
-from model_data.dataset.skill_recommendation.discription import discription_list
+from data.model_data.dataset.skill_recommendation.skills import skills_list
+from data.model_data.dataset.skill_recommendation.discription import discription_list
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -11,9 +11,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 class SkillRecommendation:
     def __init__(
         self,
-        resume_path="models/json-data/resume.json",
-        model_path="models\pickled_models\skill_model.pkl",
-        preds_path="models/json-data/similar_skills.json",
+        resume_path="data/json-data/resume.json",
+        model_path="data\pickled_models\skill_model.pkl",
+        preds_path="data/json-data/similar_skills.json",
         n_neighbors=3,
         n_top=3,
     ):

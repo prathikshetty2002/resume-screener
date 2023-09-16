@@ -6,7 +6,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import string
-from models.model_data.dataset.course_recommendation.course_list import (
+from data.model_data.dataset.course_recommendation.course_list import (
     engineering_courses,
 )
 
@@ -14,10 +14,10 @@ from models.model_data.dataset.course_recommendation.course_list import (
 class CourseRecommendation:
     def __init__(
         self,
-        data_path="models/model_data/dataset/course_recommendation/preprocessed_data.csv",
-        resume_path="models/json_data/resume.json",
-        model_path="models\pickled_models\course_model.pkl",
-        preds_path="models/json_data/similar_courses.json",
+        data_path="data/model_data/dataset/course_recommendation/preprocessed_data.csv",
+        resume_path="data/json_data/resume.json",
+        model_path="data\pickled_models\course_model.pkl",
+        preds_path="data/json_data/similar_courses.json",
         n_neighbors=5,
         top_n=5,
     ):

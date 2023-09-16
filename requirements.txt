@@ -1,8 +1,12 @@
-# all the necessary requirements will be listed here import them using pip install requirements.txt
-# dont use pip freeze instead use pipreqs --force /path/to/project to update the dependencies
-
+docx2txt==0.8
 Flask==2.2.3
-pipreqs==0.4.13
-scikit-learn==1.2.2
+matplotlib==3.8.0
+nltk==3.8.1
+numpy==1.24.4
 pandas==2.0.0
-
+pdfminer==20191125
+PyPDF2==3.0.1
+pyresparser==1.0.6
+Requests==2.31.0
+scikit_learn==1.2.2
+wordcloud==1.9.2
