@@ -18,5 +18,5 @@ json_content = json.dumps(pdf_content)
 
 # Print the JSON content
 print(pdf_content)
-with open("models\json_data\converted_resume.json", "w") as f:
+with open("data\json_data\converted_resume.json", "w") as f:
     json.dump(json_content, f, indent=4)
