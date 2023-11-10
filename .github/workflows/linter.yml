@@ -28,7 +28,15 @@ jobs:
 
     - name: Get changed Python files
       run: |
-        echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo '')" >> $GITHUB_ENV
+        echo "Base SHA: ${{ github.event.before }}"
+        echo "Head SHA: ${{ github.sha }}"
+        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo "")
+        echo "Changed Python files: $changed_files"
+        if [ -z "$changed_files" ]; then
+          echo "No Python files changed"
+          exit 0
+        fi
+        echo "changed_files=$changed_files" >> $GITHUB_ENV
 
     - name: Run Flake8 on changed files
       run: |
