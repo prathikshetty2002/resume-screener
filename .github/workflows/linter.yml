@@ -1,10 +1,10 @@
 name: Lint Code Base
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+    paths:
+      - '**.py'
 
 jobs:
   build:
@@ -27,29 +27,43 @@ jobs:
         pip install flake8
 
     - name: Get changed Python files
-      run: |
-        echo "Base SHA: ${{ github.event.before }}"
-        echo "Head SHA: ${{ github.sha }}"
-        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo "")
-        echo "Changed Python files: $changed_files"
-        if [ -z "$changed_files" ]; then
-          echo "No Python files changed"
-          exit 0
-        fi
-        echo "changed_files=$changed_files" >> $GITHUB_ENV
+      id: files
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const pull_number = context.payload.pull_request ? context.payload.pull_request.number : null;
+          if (pull_number) {
+            const result = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull_number
+            });
+            const changedFiles = result.data
+              .filter(file => file.filename.endsWith('.py'))
+              .map(file => file.filename)
+              .join(' ');
+            console.log('Changed Python files:', changedFiles);
+            if (changedFiles) {
+              core.setOutput('files', changedFiles);
+            } else {
+              console.log('No Python files changed');
+            }
+          } else {
+            console.log('This action only runs on pull_request events');
+          }
 
     - name: Run Flake8 on changed files
+      if: steps.files.outputs.files
       run: |
-        if [ -n "$changed_files" ]; then
-          echo "Running Flake8 on changed files:"
-          echo $changed_files
-          flake8_output=$(flake8 $changed_files --count --select=E9,F63,F7,F82 --show-source --statistics)
-          echo "flake8_output<<EOF" >> $GITHUB_ENV
-          echo "$flake8_output" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-        else
-          echo "No Python files changed"
-        fi
+        changed_files=${{ steps.files.outputs.files }}
+        echo "Running Flake8 on changed files:"
+        echo $changed_files
+        flake8_output=$(flake8 $changed_files --count --select=E9,F63,F7,F82 --show-source --statistics)
+        echo "flake8_output<<EOF" >> $GITHUB_ENV
+        echo "$flake8_output" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
     - name: Post results as a comment
       if: env.flake8_output
       uses: actions/github-script@v3
@@ -57,22 +71,14 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
           const output = `Flake8 Lint Results:\n\`\`\`\n${{ env.flake8_output }}\n\`\`\``;
-          let issue_number;
-    
-          if (context.payload.pull_request) {
-            issue_number = context.payload.pull_request.number;
-          } else if (context.issue) {
-            issue_number = context.issue.number;
-          }
-    
-          if (issue_number) {
+          const pull_number = context.payload.pull_request ? context.payload.pull_request.number : null;
+          if (pull_number) {
             github.issues.createComment({
-              issue_number: issue_number,
+              issue_number: pull_number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             });
           } else {
-            console.log("No issue or pull request context available for commenting.");
+            console.log('No pull request context available for commenting.');
           }
-    
