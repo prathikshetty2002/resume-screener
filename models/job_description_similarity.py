@@ -23,6 +23,10 @@ class ResumeAnalyzer:
         nltk.download('punkt')
         self.stop_words = stopwords.words('english')
 
+    def error():
+        print("glad u found this shit case")
+        
+
     def preprocess_text(self, text):
         clean_text = text.lower()
         clean_text = re.sub(r'[^\w\s]', '', clean_text)
