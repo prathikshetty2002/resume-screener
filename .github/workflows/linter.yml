@@ -27,18 +27,33 @@ jobs:
         pip install flake8
 
     - name: Get changed Python files
-      id: files
       run: |
-        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo "")
-        echo "Changed Python files: $changed_files"
-        if [ -z "$changed_files" ]; then
-          echo "No Python files changed"
-          exit 0
-        fi
-        echo "::set-output name=files::$changed_files"
+        echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo '')" >> $GITHUB_ENV
 
     - name: Run Flake8 on changed files
-      if: steps.files.outputs.files
       run: |
-        flake8 ${{ steps.files.outputs.files }} --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 ${{ steps.files.outputs.files }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        if [ -n "$changed_files" ]; then
+          echo "Running Flake8 on changed files:"
+          echo $changed_files
+          flake8_output=$(flake8 $changed_files --count --select=E9,F63,F7,F82 --show-source --statistics)
+          echo "flake8_output<<EOF" >> $GITHUB_ENV
+          echo "$flake8_output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        else
+          echo "No Python files changed"
+        fi
+
+    - name: Post results as a comment
+      if: env.flake8_output
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const output = `Flake8 Lint Results:\n\`\`\`\n${{ env.flake8_output }}\n\`\`\``;
+          const issue_number = context.issue.number || context.payload.pull_request.number;
+          github.issues.createComment({
+            issue_number: issue_number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          });
