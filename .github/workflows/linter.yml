@@ -51,7 +51,6 @@ jobs:
             }
           } else {
             console.log('This action only runs on pull_request events');
-          }
 
     - name: Run Flake8 on changed files
       if: steps.files.outputs.files
@@ -81,4 +80,3 @@ jobs:
             });
           } else {
             console.log('No pull request context available for commenting.');
-          }
