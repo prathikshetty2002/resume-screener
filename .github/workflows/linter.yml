@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetches all history for all branches and tags
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -24,9 +26,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8
 
-    - name: Run Flake8
+    - name: Get changed Python files
+      id: files
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || echo "")
+        echo "Changed Python files: $changed_files"
+        if [ -z "$changed_files" ]; then
+          echo "No Python files changed"
+          exit 0
+        fi
+        echo "::set-output name=files::$changed_files"
+
+    - name: Run Flake8 on changed files
+      if: steps.files.outputs.files
+      run: |
+        flake8 ${{ steps.files.outputs.files }} --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 ${{ steps.files.outputs.files }} --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
