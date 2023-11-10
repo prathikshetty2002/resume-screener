@@ -50,7 +50,6 @@ jobs:
         else
           echo "No Python files changed"
         fi
-
     - name: Post results as a comment
       if: env.flake8_output
       uses: actions/github-script@v3
@@ -58,10 +57,22 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
           const output = `Flake8 Lint Results:\n\`\`\`\n${{ env.flake8_output }}\n\`\`\``;
-          const issue_number = context.issue.number || context.payload.pull_request.number;
-          github.issues.createComment({
-            issue_number: issue_number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          });
+          let issue_number;
+    
+          if (context.payload.pull_request) {
+            issue_number = context.payload.pull_request.number;
+          } else if (context.issue) {
+            issue_number = context.issue.number;
+          }
+    
+          if (issue_number) {
+            github.issues.createComment({
+              issue_number: issue_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+          } else {
+            console.log("No issue or pull request context available for commenting.");
+          }
+    
