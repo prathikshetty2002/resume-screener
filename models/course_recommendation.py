@@ -82,7 +82,10 @@ class CourseRecommendation:
             if index != course_index:
                 similar_courses.append(course_data["Title"][index])
         return similar_courses
-
+        
+    def hello():
+        print("hello just a checker")
+        
     def recommend_similar_course_sim(self, course_name):
         vectorizer = TfidfVectorizer()
         course_names = list(self.get_data()[0]["Title"])
