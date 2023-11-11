@@ -44,15 +44,17 @@ jobs:
         echo "Base SHA: $base_sha"
         echo "Head SHA: $head_sha"
         changed_files=$(git diff --name-only $base_sha $head_sha | grep '\.py$' || echo "")
+
         echo "Changed Python files: $changed_files"
         if [ -z "$changed_files" ]; then
           echo "No Python files changed"
           exit 0
         fi
-        echo "changed_files=$changed_files" >> $GITHUB_ENV
+        echo "::set-output name=files::${changed_files}"
 
     - name: Run Linter on Changed Files
       run: |
+        changed_files="${{ steps.files.outputs.files }}"
         if [ -n "$changed_files" ]; then
           echo "Running Flake8 on changed files:"
           echo $changed_files
