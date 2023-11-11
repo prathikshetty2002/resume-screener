@@ -17,12 +17,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 import io
 
 
+
 class ResumeAnalyzer:
     def __init__(self):
         nltk.download('stopwords')
         nltk.download('punkt')
         self.stop_words = stopwords.words('english')
 
+    def error():
+        print("testing")
+        
     def error():
         print("glad u found this shit case")
         
