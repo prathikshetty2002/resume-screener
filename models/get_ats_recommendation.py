@@ -7,7 +7,10 @@ def load_json_file(file_path):
     with open(file_path) as f:
         data = json.load(f)
     return data
-
+    
+def testttt():
+    print("piece of shit code")
+    
 # gives recommendations based on the ats format
 def ats_recommendations(json_data):
     recommendations = []
