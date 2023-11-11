@@ -1,63 +1,73 @@
-name: Lint Code Base on PR
+name: Lint Code Base
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.py'
   pull_request:
     branches: [ main ]
+    paths:
+      - '**.py'
 
 jobs:
-  lint:
-    name: Lint Changed Files
+  build:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 0  # Fetches all history for all branches and tags
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
-    - name: Install Linter (Flake8)
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8
 
-    - name: Fetch PR Base and Head SHAs
-      id: pr_info
-      uses: actions/github-script@v3
-      with:
-        script: |
-          const pr = await github.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          return { base_sha: pr.data.base.sha, head_sha: pr.data.head.sha };
-
-    - name: Get Changed Files
+    - name: Get changed Python files
       run: |
-        base_sha="${{ steps.pr_info.outputs.base_sha }}"
-        head_sha="${{ steps.pr_info.outputs.head_sha }}"
+        base_sha=$(git merge-base ${{ github.event.pull_request.base.sha || github.base_ref }} ${{ github.sha }})
         echo "Base SHA: $base_sha"
-        echo "Head SHA: $head_sha"
-        changed_files=$(git diff --name-only $base_sha $head_sha | grep '\.py$' || echo "")
-
+        echo "Head SHA: ${{ github.sha }}"
+        changed_files=$(git diff --name-only $base_sha ${{ github.sha }} | grep '\.py$' || echo "")
         echo "Changed Python files: $changed_files"
         if [ -z "$changed_files" ]; then
           echo "No Python files changed"
           exit 0
         fi
-        echo "::set-output name=files::${changed_files}"
+        echo "changed_files=$changed_files" >> $GITHUB_ENV
 
-    - name: Run Linter on Changed Files
+    - name: Run Flake8 on changed files
       run: |
-        changed_files="${{ steps.files.outputs.files }}"
         if [ -n "$changed_files" ]; then
           echo "Running Flake8 on changed files:"
           echo $changed_files
-          flake8 $changed_files
+          flake8_output=$(flake8 $changed_files --count --select=E9,F63,F7,F82 --show-source --statistics)
+          echo "flake8_output<<EOF" >> $GITHUB_ENV
+          echo "$flake8_output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
         else
           echo "No Python files changed"
+        fi
+
+    - name: Post results as a comment
+      if: env.flake8_output
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const output = `Flake8 Lint Results:\n\`\`\`\n${{ env.flake8_output }}\n\`\`\``;
+          const issue_number = context.payload.pull_request ? context.payload.pull_request.number : context.issue.number;
+          github.issues.createComment({
+            issue_number: issue_number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          });
+    
