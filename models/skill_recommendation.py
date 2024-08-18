@@ -22,7 +22,10 @@ class SkillRecommendation:
         self.preds_path = preds_path
         self.n_neighbors = n_neighbors
         self.n_top = n_top
-
+        
+    def test():
+        print("this shit works lmao")
+        
     def get_data(self):
         with open(self.resume_path, "r") as f:
             data = json.load(f)
