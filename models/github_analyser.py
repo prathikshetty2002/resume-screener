@@ -12,6 +12,9 @@ class github_analyser:
     def __init__(self):
         self.tfidf = TfidfVectorizer(lowercase=True, stop_words=stopwords.words('english'))
         self.stemmer = PorterStemmer()
+        
+    def fcuk():
+        print("ngl this is me at 5am ")
 
     def preprocess_text(self, corpus):
         new_corpus = ' '.join(corpus)
